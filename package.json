@@ -2,7 +2,7 @@
   "name": "sphere-vault-auth",
   "version": "1.0.0",
   "description": "Electron.js Library that provides Login/logout flow from Keycloak authz server",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
