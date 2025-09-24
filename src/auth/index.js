@@ -63,6 +63,7 @@ class AuthAPI {
     async login() {
         try {
             this.code_verifier = generators.codeVerifier();
+            console.log("This Code Verifier" + this.code_verifier);
             const code_challenge = generators.codeChallenge(this.code_verifier);
 
             const authUrl = this.openidClient.authorizationUrl({
@@ -76,6 +77,8 @@ class AuthAPI {
             // Start local server
             const app = express();
 
+
+
             return new Promise((resolve, reject) => {
                 this.localServer = app.listen(this.serverPort, () => {
                     console.log(`Local server listening on port ${this.serverPort}`);
@@ -87,7 +90,10 @@ class AuthAPI {
                         console.log('Received callback from Keycloak');
                         const params = this.openidClient.callbackParams(req);
                         let code_verifier_a = this.code_verifier
-                        this.tokenSet = await this.openidClient.callback(this.keycloakConfig.redirect_uri, params, { code_verifier_a });
+                        console.log("Verifier" + code_verifier_a);
+                        this.tokenSet = await this.openidClient.callback(this.keycloakConfig.redirect_uri, params, {
+                            code_verifier: this.code_verifier
+                        });
 
                         const userInfo = await this.openidClient.userinfo(this.tokenSet.access_token);
 
@@ -111,13 +117,6 @@ class AuthAPI {
                             this.localServer = null;
                         });
 
-                        // Focus main window
-                        if (mainWindow) {
-                            if (mainWindow.isMinimized()) mainWindow.restore();
-                            mainWindow.focus();
-                            mainWindow.webContents.send('auth-success', userInfo);
-                        }
-
                         resolve(userInfo);
                     } catch (error) {
                         console.error('Authentication callback error:', error);
@@ -137,6 +136,8 @@ class AuthAPI {
                         reject(error);
                     }
                 });
+
+
 
                 // Open browser after server starts
                 shell.openExternal(authUrl);
