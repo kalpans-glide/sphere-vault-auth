@@ -3,14 +3,37 @@
 const { shell } = require('electron');
 const { Issuer, generators } = require('openid-client');
 const express = require('express');
-// const { ipcRenderer } = require('electron');
 const dotenv = require('dotenv');
 dotenv.config();
 
+const AUTH_SUCCESS_MESSAGE_PAGE = `
+    <html>
+    <head>
+        <title>Authentication Successful</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+        <h1 style="color: green;">✓ Authentication Successful!</h1>
+        <p>You can close this window and return to the app.</p>
+        <script>
+            setTimeout(() => window.close(), 3000);
+        </script>
+    </body>
+    </html>
+`;
+
+const AUTH_FAILED_PAGE = `
+    < html >
+    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+        <h1 style="color: red;">Authentication Failed</h1>
+        <p>Please try again.</p>
+        <script>
+            setTimeout(() => window.close(), 3000);
+        </script>
+    </body>
+    </html >
+`;
+
 async function kcInit(kcConfig) {
-    // Discover Keycloak's endpoints
-    console.log('Using redirect URI:', kcConfig.redirect_uri);
-    console.log('The Issuer is:', kcConfig.issuer);
     const keycloakIssuer = await Issuer.discover(kcConfig.issuer);
 
     // Initialize the client
@@ -21,8 +44,6 @@ async function kcInit(kcConfig) {
         token_endpoint_auth_method: 'none',
     });
 }
-
-
 
 // sphere-vault-auth
 class AuthAPI {
@@ -46,9 +67,6 @@ class AuthAPI {
             scope: 'openid profile email',
             redirect_uri: "http://localhost:3001/callback",
         };
-
-        console.log('Constructor called');
-        console.log('Keycloak config:', this.keycloakConfig);
     }
 
     async init() {
@@ -63,7 +81,6 @@ class AuthAPI {
     async login() {
         try {
             this.code_verifier = generators.codeVerifier();
-            console.log("This Code Verifier" + this.code_verifier);
             const code_challenge = generators.codeChallenge(this.code_verifier);
 
             const authUrl = this.openidClient.authorizationUrl({
@@ -71,8 +88,6 @@ class AuthAPI {
                 code_challenge,
                 code_challenge_method: 'S256',
             });
-
-            console.log('Starting local server on port:', this.serverPort);
 
             // Start local server
             const app = express();
@@ -98,46 +113,25 @@ class AuthAPI {
                         const userInfo = await this.openidClient.userinfo(this.tokenSet.access_token);
 
                         // Send success response
-                        res.send(`
-                        <html>
-                            <head><title>Authentication Successful</title></head>
-                            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                                <h1 style="color: green;">✓ Authentication Successful!</h1>
-                                <p>You can close this window and return to the app.</p>
-                                <script>
-                                    setTimeout(() => window.close(), 2000);
-                                </script>
-                            </body>
-                        </html>
-                    `);
+                        res.send(AUTH_SUCCESS_MESSAGE_PAGE);
 
                         // Close server
                         this.localServer.close(() => {
                             console.log('Local server closed.');
                             this.localServer = null;
                         });
-
                         resolve(userInfo);
                     } catch (error) {
-                        console.error('Authentication callback error:', error);
-                        res.status(400).send(`
-                        <html>
-                            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                                <h1 style="color: red;">Authentication Failed</h1>
-                                <p>Please try again.</p>
-                            </body>
-                        </html>
-                    `);
+                        // console.error('Authentication callback error:', error);
+                        res.status(400).send(AUTH_FAILED_PAGE);
 
                         if (this.localServer) {
                             this.localServer.close();
                             this.localServer = null;
                         }
-                        reject(error);
+                        reject(new Error(error.message));
                     }
                 });
-
-
 
                 // Open browser after server starts
                 shell.openExternal(authUrl);
