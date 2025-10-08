@@ -1,25 +1,35 @@
 {
-  "name": "sphere-vault-auth",
+  "name": "wrapper",
   "version": "1.0.0",
-  "description": "Electron.js Library that provides Login/logout flow from Keycloak authz server",
-  "main": "index.js",
+  "description": "",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:kalpans-glide/sphere-vault-auth.git"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'No build step required'",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
-    "auth",
-    "keycloak"
+    "keycloak",
+    "authentication",
+    "electron",
+    "oauth2",
+    "openid",
+    "pkce",
+    "token",
+    "security"
   ],
-  "author": "Kalpan Shah",
+  "author": "Siddhi Toliya",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.2",
-    "electron": "^38.1.2",
     "express": "^5.1.0",
+    "keytar": "^7.9.0",
     "openid-client": "^5.7.1"
+  },
+  "peerDependencies": {
+    "electron": ">=38.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

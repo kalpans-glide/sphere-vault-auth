@@ -1,34 +1,22 @@
-# usage inside an Electron app
-```
-const { Auth } = require('svAuth');
+# Sphere Vault Auth
 
-const auth = new Auth({
-  kcUrl: process.env.KC_URL,           // Keycloak base (realm URL)
-  clientId: process.env.KC_CLIENT_ID
-});
+Enterprise-grade Keycloak authentication wrapper for Electron applications with secure token management.
 
-await auth.init();
+## Features
 
-await auth.login();                     // opens browser + callback
-const token = await auth.getAccessToken();
-await auth.logout();
-```
+- 🔐 PKCE OAuth2/OpenID Connect flow
+- 🔄 Automatic token refresh with retry logic
+- 💾 Secure token storage using system keychain (keytar)
+- 🛡️ Role-based access control
+- 📱 Electron-optimized
+- 🔧 Configurable and extensible
 
-# requirements
-    "dotenv": "^17.2.2",
-    "electron": "^38.1.2",
-    "express": "^5.1.0",
-    "openid-client": "^5.7.1"
+## Installation
 
-# .env file
-```
-KC_URL=https://keycloak-base-url/realms/your-realm
-CLIENT_ID=your-keycloak-client-id
-```
+### As npm package (recommended)
+```bash
+# In sphere-vault-auth folder
+npm link
 
----
-
-<div align="center">
-  <p>Built with ❤️ by Kalpan Shah</p>
-  <p>© 2025 Me</p>
-</div>
+# In your Electron app folder
+npm link sphere-vault-auth
