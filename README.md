@@ -19,4 +19,4 @@ Enterprise-grade Keycloak authentication wrapper for Electron applications with 
 npm link
 
 # In your Electron app folder
-npm link sphere-vault-auth
+npm link wrapper
